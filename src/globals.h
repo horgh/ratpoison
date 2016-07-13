@@ -207,6 +207,8 @@ void set_selection (char *txt);
 void set_nselection (char *txt, int len);
 char *get_selection (void);
 
+extern Window focussed_window;
+
 /* Wrapper font functions to support Xft */
 
 void rp_draw_string (rp_screen *s, Drawable d, int style, int x, int y, char *string, int length);

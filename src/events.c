@@ -35,6 +35,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/wait.h>
+#include <syslog.h>
 
 #include "ratpoison.h"
 
@@ -680,15 +681,60 @@ colormap_notify (XEvent *ev)
     }
 }
 
+// enforce_focussed_window() runs after receipt of a FocusIn event with mode
+// NotifyNormal.
+//
+// It checks if the window receiving focus is one we (ratpoison) focussed.
+// If it is not, we set focus back to what it should be.
+//
+// This is useful in cases where you have misbehaving programs that steal
+// keyboard focus. I have seen this happen when clicking into a program but not
+// actually focussing it otherwise.
+static void
+enforce_focussed_window(Window w)
+{
+  // If this is a window we focussed then leave it alone.
+  if (w == focussed_window) {
+    syslog(LOG_INFO, "Permitted window focus (%ld).", w);
+    return;
+  }
+
+  // Note: We do this more than is strictly necessary. For example if you select
+  // a new window with ratpoison, you will see this occur once. My belief is
+  // what happens is this:
+  // 1. Focus to ratpoison (to do the selection)
+  // 2. Focus reverts back to the window you were in.
+  // 3. Focus immediately switches to the new window.
+  //
+  // We see a FocusIn event occur at #2 and try to revert it to #3. Then we see
+  // the FocusIn to #3 and leave it alone.
+
+  syslog(LOG_INFO, "Unwanted Focus to %ld. Reverting to %ld.", w,
+    focussed_window);
+
+  set_window_focus(focussed_window);
+}
+
 static void
 focus_change (XFocusChangeEvent *ev)
 {
-  rp_window *win;
+  if (!ev) {
+    return;
+  }
+
+  // For FocusIn event with a NotifyNormal mode, see if we need to revert focus
+  // theft.
+  if (ev->type == FocusIn && ev->mode == NotifyNormal) {
+    enforce_focussed_window(ev->window);
+    return;
+  }
 
   /* We're only interested in the NotifyGrab mode */
-  if (ev->mode != NotifyGrab) return;
+  if (ev->mode != NotifyGrab) {
+    return;
+  }
 
-  win = find_window (ev->window);
+  rp_window * win = find_window (ev->window);
 
   if (win != NULL)
     {

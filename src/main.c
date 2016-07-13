@@ -35,6 +35,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <ctype.h>
+#include <syslog.h>
 
 #include "ratpoison.h"
 
@@ -789,6 +790,8 @@ main (int argc, char *argv[])
   if (current_window() == NULL)
     set_window_focus (current_screen()->key_window);
 
+  openlog("ratpoison", LOG_PID | LOG_ODELAY, LOG_USER);
+  syslog(LOG_INFO, "listening for events");
   listen_for_events ();
 
   return EXIT_SUCCESS;
