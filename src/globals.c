@@ -20,7 +20,6 @@
 
 #include "ratpoison.h"
 
-#include <syslog.h>
 #include <unistd.h>
 
 int alarm_signalled = 0;
@@ -92,7 +91,7 @@ struct numset *rp_frame_numset;
 /* The X11 selection globals */
 rp_xselection selection;
 
-// The window we last gave focus to.
+/* The window we last gave focus to. */
 Window focussed_window = 0;
 
 static void
@@ -257,7 +256,6 @@ void
 set_rp_window_focus (rp_window *win)
 {
   PRINT_DEBUG (("Giving focus to '%s'\n", window_name (win)));
-  syslog(LOG_INFO, "Giving focus to %ld.", win->w);
   focussed_window = win->w;
   XSetInputFocus (dpy, win->w,
                   RevertToPointerRoot, CurrentTime);
@@ -267,7 +265,6 @@ void
 set_window_focus (Window window)
 {
   PRINT_DEBUG (("Giving focus to %ld\n", window));
-  syslog(LOG_INFO, "Giving focus to %ld.", window);
   focussed_window = window;
   XSetInputFocus (dpy, window,
                   RevertToPointerRoot, CurrentTime);

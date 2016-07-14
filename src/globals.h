@@ -207,6 +207,7 @@ void set_selection (char *txt);
 void set_nselection (char *txt, int len);
 char *get_selection (void);
 
+/* The window we last gave focus to. */
 extern Window focussed_window;
 
 /* Wrapper font functions to support Xft */
