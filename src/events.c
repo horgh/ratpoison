@@ -697,7 +697,7 @@ enforce_focussed_window (Window w) {
       return;
     }
 
-  set_window_focus(focussed_window);
+  set_window_focus (focussed_window);
 }
 
 static void
@@ -711,7 +711,7 @@ focus_change (XFocusChangeEvent *ev)
   /* See if we need to revert focus theft. */
   if (ev->type == FocusIn && ev->mode == NotifyNormal)
     {
-      enforce_focussed_window(ev->window);
+      enforce_focussed_window (ev->window);
       return;
     }
 
