@@ -689,7 +689,8 @@ colormap_notify (XEvent *ev)
  *
  * This is useful in cases where you have programs stealing keyboard focus.
  */
-static void enforce_focussed_window (Window w) {
+static void
+enforce_focussed_window (Window w) {
   /* If this is a window we focussed, then leave it alone. */
   if (w == focussed_window)
     {
