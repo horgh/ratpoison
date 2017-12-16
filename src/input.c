@@ -101,7 +101,7 @@ init_xkb (void)
   if (!use_xkb)
     PRINT_DEBUG (("Not using XKB, XkbQueryExtension failed\n"));
 #else
-  PRINT_DEBUG (("Built with no XKB support."));
+  PRINT_DEBUG (("Built with no XKB support.\n"));
   use_xkb = False;
 #endif
 }
@@ -565,7 +565,7 @@ get_more_input (char *prompt, char *preinput, int history_id,
     {
       read_key (&ch, &modifier, keysym_buf, sizeof (keysym_buf));
       modifier = x11_mask_to_rp_mask (modifier);
-      PRINT_DEBUG (("ch = %ld, modifier = %d, keysym_buf = %s",
+      PRINT_DEBUG (("ch = %ld, modifier = %d, keysym_buf = %s\n",
                     ch, modifier, keysym_buf));
       status = execute_edit_action (line, ch, modifier, keysym_buf);
 
