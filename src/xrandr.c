@@ -209,25 +209,49 @@ static void
 xrandr_crtc_change (XRRCrtcChangeNotifyEvent *ev)
 {
   rp_screen *screen;
+  XRRScreenResources *screen_resources;
+  XRRCrtcInfo *crtc_info;
 
   if (!ev->crtc || !ev->width || !ev->height)
     return;
 
   screen = xrandr_screen_crtc (ev->crtc);
 
-  PRINT_DEBUG (("%s: crtc %s, rotation %s "
+  PRINT_DEBUG (("%s: crtc %lu %s, rotation %s "
                 "ev->x %d, ev->y %d, ev->width %d, ev->height %d\n",
-                __func__, screen ? "found" : "not found",
+                __func__, ev->crtc, screen ? "found" : "not found",
                 xrandr_rotation_string (ev->rotation),
                 ev->x, ev->y, ev->width, ev->height));
 
   if (!screen)
     return;
 
+  /* While the event has position and dimension information, it is not always
+   * correct. Query and get the correct information. This particularly appears
+   * to happen when scaling an output. */
+  screen_resources = XRRGetScreenResourcesCurrent (dpy, RootWindow (dpy,
+                                                   DefaultScreen (dpy)));
+  if (!screen_resources) {
+    PRINT_ERROR (("%s: XRRGetScreenResources() failed\n", __func__));
+    return;
+  }
+
+  crtc_info = XRRGetCrtcInfo (dpy, screen_resources, screen->xrandr.crtc);
+  if (!crtc_info) {
+    PRINT_ERROR (("%s: XRRGetCrtcInfo() failed\n", __func__));
+    XRRFreeScreenResources (screen_resources);
+    return;
+  }
+
   if (ev->rotation == RR_Rotate_90 || ev->rotation == RR_Rotate_270)
-    screen_update (screen, ev->x, ev->y, ev->height, ev->width);
+    screen_update (screen, crtc_info->x, crtc_info->y, crtc_info->height,
+                   crtc_info->width);
   else
-    screen_update (screen, ev->x, ev->y, ev->width, ev->height);
+    screen_update (screen, crtc_info->x, crtc_info->y, crtc_info->width,
+                   crtc_info->height);
+
+  XRRFreeScreenResources (screen_resources);
+  XRRFreeCrtcInfo (crtc_info);
 }
 
 void
